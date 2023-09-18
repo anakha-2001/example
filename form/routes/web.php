@@ -1,6 +1,10 @@
 <?php
-
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Cookie;
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -13,14 +17,43 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+Route::get('/', function (Request $request) {
+    Session::put("message","logged in successfully");
+   
+    $request->session()->flash("hello","hello world");
+    Cookie::queue("hello","testing",1);
+    // $request->session()->forget('message');
+    // dd($request->session()->all());
+    
+    return view('welcome');
+});
+
+
+Route::get('/about', function (Request $request) {
+    // Session::put("message","logged in successfully");
+   
+    // $request->session()->flash("hello","hello world");
+    // $request->session()->forget('message');
+    dd($request->session()->all());
+    
     return view('welcome');
 });
 
 Route::get('/form', function () {
     return view("form");
-    })->name("form");
+})->name("form");
 
-    Route::post("post",function(Request $request){
+Route::post("post",function(Request $request){
+        $validated = $request->validate([
+            'name'=>'required',
+            'age'=>['required','gte:18'],
+            'date'=>['required','date','before_or_equal:2023-09-23']
+        ]);
 
-    })->name("submit.form");
+        if($request->file("image")){
+            foreach($request->file('image')as $file){
+                $filename=date("YmdHi").$file->getClientOrginalName();
+            }
+        }
+
+})->name("submit.form");
